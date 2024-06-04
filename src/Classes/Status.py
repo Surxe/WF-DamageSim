@@ -7,11 +7,15 @@
 
 class Status:
     statuses_objects = []
+    statuses_names = []
 
     def __init__(self, name):
         self.name = name
 
         Status.statuses_objects.append(self)
+        Status.statuses_names.append(name)
+
+    
 
     # From status name, return status object
     def getStatusObject(name):

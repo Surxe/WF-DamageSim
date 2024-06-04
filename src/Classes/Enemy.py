@@ -28,6 +28,14 @@ class Enemy:
     def update_damage_reduction(self):
         self.damage_reduction = self.armor/(self.armor+300)
 
+    def hit_by(self, weapon, direct_or_aoe):
+        # Total the damage
+        damage = 0
+
+        damage = weapon.attack(direct_or_aoe)
+        self.take_damage(damage)
+
+
     def take_damage(self, damage):
         self.health_points -= damage * (1 - self.damage_reduction)
         if self.health_points < 0:
