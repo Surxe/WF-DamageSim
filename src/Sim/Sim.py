@@ -28,18 +28,20 @@ statuses = [Status("Impact"),
 enemy1 = Enemy("Corrupted Heavy Gunner", 175, 97791.79, 0, 9791.1, "Steel Path")
 print("Enemy before hit")
 print(enemy1)
+print()
 
 # Create some sample weapons
-weapon1 = Weapon("Lex Prime Incarnon Form", .667, 20, None, 
+weapon2 = Weapon("Lex Prime Incarnon Form", .667, 20, None, 
                  [WeaponEffect("Direct", [400, 800], ["Impact", "Radiation"], .44, .54, 3.4)])
 
-weapon2 = Weapon("Laetum Incarnon Form", 6.67, 216, None,
+weapon1 = Weapon("Laetum Incarnon Form", 6.67, 216, None,
                  [WeaponEffect("Direct", [100], ["Radiation"], .42, .12, 2.2),
                   WeaponEffect("Radial", [300], ["Radiation"], .42, .12, 2.2)])
 
 # Print the weapon stats
 print("Stats before modding")
 weapon1.print_stats()
+print()
 
 # Create some sample mods
 mods = [#Mod("Riven", ["Damage"], [1.65]),
@@ -55,8 +57,11 @@ mods = [#Mod("Riven", ["Damage"], [1.65]),
 
 
 # Install mods
-for mod in mods:
-    weapon1.install_mod(mod)
+weapon1.install_mods(mods)
+
+# Print the installed mods
+weapon1.print_installed_mods()
+print()
 
 # Apply them all to see the modded sums (like an invisible save button in Arsenal)
 weapon1.apply_mods()
@@ -64,11 +69,13 @@ weapon1.apply_mods()
 # Print the modded stats
 print("Stats after modding")
 weapon1.print_stats()
+print()
 
 # Hit the enemy with the weapon
-enemy1.hit_by(weapon2, "Direct")
+enemy1.hit_by(weapon1, "Direct")
 
 
 print("Enemy after hit")
 print(enemy1)
+print()
 

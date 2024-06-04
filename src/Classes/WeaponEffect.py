@@ -10,10 +10,13 @@ class WeaponEffect:
     def __init__(self, name, status_damages, status_names, status_chance, crit_chance, crit_multiplier):
         self.name = name
         self.status_damages = status_damages
+        self.base_status_damages_sum = sum(status_damages)
         status_objects = []
         self.status_names = status_names
         for status_name in status_names:
             status_objects.append(Status.getStatusObject(status_name))
+
+        self.status_multipliers = [1 for i in range(len(status_names))]
         self.status_objects = status_objects
         self.status_chance = status_chance
 
@@ -41,7 +44,7 @@ class WeaponEffect:
         # elif crit_tier == 3:
         #     print("Red crit", end='')
         # print(" for " + str(damage) + " damage")
-        print("Damaged target for " + str(damage) + " damage")
+        print("Damaged target for " + str(damage) + " damage, pre-mitigation")
 
         # Register status procs
 

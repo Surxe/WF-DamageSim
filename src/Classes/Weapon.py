@@ -21,9 +21,12 @@ class Weapon:
         self.status_chance_modded = 1
         self.crit_chance_modded = 1
         self.crit_multiplier_modded = 1
-        self.status_multipliers = [1] * len(Status.statuses_names) # starts empty, will be filled in install_mod
+        self.status_names_modded = []
+        self.status_multipliers_modded = []
 
         self.weapon_effects = weapon_effects
+
+        self.installed_mods = []
 
     # Converts localized moddable stat to its respective attribute
     def localized_to_attribute(self, stat_localized):
@@ -44,6 +47,17 @@ class Weapon:
             print(f"Invalid stat {stat_localized}")
             raise ValueError("Invalid stat")
         
+    # Installs all mods to the weapon
+    def install_mods(self, mods):
+        # Clear the installed mods
+        self.installed_mods = []
+
+        if len(mods) > 8:
+            raise ValueError("Too many mods, max is 8")
+        for mod in mods:
+            self.install_mod(mod)
+        
+    # Installs a mod to the weapon, but does not apply it to the used stats
     def install_mod(self, mod):
         modified_stats = mod.get_modified_stats()
         modified_values = mod.get_modified_values()
@@ -55,14 +69,29 @@ class Weapon:
 
             # Elements are handled separately
             if attribute == "status_multipliers":
-                self.status_multipliers[Status.statuses_names.index(stat_localized)] += modified_values[i]
+                # If the element is already in the status_names_modded list, add it to the existing multiplier in status_multipliers_modded, otherwise add it to status_names_modded
+                if stat_localized in self.status_names_modded:
+                    self.status_multipliers_modded[self.status_names_modded.index(stat_localized)] += modified_values[i]
+                else:
+                    self.status_names_modded.append(stat_localized)
+                    self.status_multipliers_modded.append(modified_values[i])
+
+
 
             # Non elements
             else:
                 setattr(self, attribute, getattr(self, attribute) + modified_values[i])
 
-        # Print
-        print(f"Mod {mod.name} installed on {self.name}")
+        # Add the mod to the installed mods
+        self.installed_mods.append(mod)
+
+    def print_installed_mods(self):
+        print("Mods installed on " + self.name + ":")
+        index = 1
+        for mod in self.installed_mods:
+            print(f"Mod {index}: {mod.name}")
+            index += 1
+        
 
     # Applies the modded sums to all applicable stats
     def apply_mods(self):
@@ -77,12 +106,24 @@ class Weapon:
             effect.crit_multiplier *= self.crit_multiplier_modded
             effect.status_chance *= self.status_chance_modded
             
-            # Apply element status multipliers
-            for i in range(len(Status.statuses_names)):
-                if Status.statuses_names[i] in effect.status_names:
-                    effect.status_damages[effect.status_names.index(Status.statuses_names[i])] *= self.status_multipliers[i]
+            # Apply modded element status multipliers
+            # Example
+            # Base elements of [Impact, Radiation] with damages [200, 300] and status_multipliers of [1, 1]
+            # Applying status_names_modded [Toxin, Electric, Heat] with with status_multipliers_modded of [.6, .6, 1.6]
+            # Final elements are [Impact, Radiation, Toxin, Electric, Heat] with damages [200*1, 300*1, 500*.6, 500*.6, 500*1.6]
             
-            # Apply Damage
+            print(f"Status names modded: {self.status_names_modded}, Status multipliers modded: {self.status_multipliers_modded}")
+            for i in range(len(self.status_names_modded)):
+                if self.status_names_modded[i] in effect.status_names:
+                    # Add the modded status multiplier to the existing status multiplier
+                    effect.status_damages[effect.status_names.index(self.status_names_modded[i])] *= self.status_multipliers_modded[i]
+                else:
+                    # Add the base status damage multiplied by the modded status multiplier
+                    # Add the element to the list of elements
+                    effect.status_damages.append(effect.base_status_damages_sum * self.status_multipliers_modded[i])
+                    effect.status_names.append(self.status_names_modded[i])
+            
+            # Apply Damage multiplier to all elements
             for i in range(len(effect.status_damages)):
                 effect.status_damages[i] *= self.damage_modded
 
